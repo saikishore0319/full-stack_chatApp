@@ -1,56 +1,62 @@
-version: '3.8'
-
 services:
   frontend:
-    image: iemafzal/frontend:v1
-    ports:
-      - "8080:80"
-    depends_on:
-      - backend
-    networks:
-      - chat-network
-    environment:
-      - BACKEND_URL=http://backend:5001
-
+    image: saikishore1903/chatapp_front-end
+    ports: 
+    - "80:80"
+    depends_on: 
+    - backend
+    networks: 
+    - chat-network
+    environment: 
+    - BACKEND_URL=http://backend:5001
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL","curl -f http://localhost:80 || exit 1"]
+      interval: 30s
+      start_period: 5s
+      timeout: 10s
+      retries: 5
   backend:
-    image: iemafzal/backend:v1
+    image: saikishore1903/chatapp-backend
     ports:
-      - "5001:5001"
+    - "5001:5001"
     depends_on:
-      - mongo
-    environment:
-      - MONGODB_URI=mongodb://root:admin@mongo:27017/chatApp?authSource=admin
-      - PORT=5001
-      - NODE_ENV=production
-      - JWT_SECRET=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJPbmxpbmUgSldUIEJ1aWxkZXIiLCJpYXQiOjE3MzI0NjA1NTEsImV4cCI6MTc2Mzk5NjU1MSwiYXVkIjoid3d3LmV4YW1wbGUuY29tIiwic3ViIjoianJvY2tldEBleGFtcGxlLmNvbSIsIkdpdmVuTmFtZSI6IkpvaG5ueSIsIlN1cm5hbWUiOiJSb2NrZXQiLCJFbWFpbCI6Impyb2NrZXRAZXhhbXBsZS5jb20iLCJSb2xlIjpbIk1hbmFnZXIiLCJQcm9qZWN0IEFkbWluaXN0cmF0b3IiXX0.YTeR6zLCKuOPjz5CYfwxW1gXp_wP1gAnN3qSMJIFQFg
+    - mongo
     networks:
-      - chat-network
+    - chat-network
+    environment:
+    - MONGODB_URI=mongodb://root:admin@mongo:27017/chatApp?authSource=admin
+    - PORT=5001
+    - NODE_ENV=production
+    - JWT_SECRET=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJPbmxpbmUgSldUIEJ1aWxkZXIiLCJpYXQiOjE3MzI0NjA1NTEsImV4cCI6MTc2Mzk5NjU1MSwiYXVkIjoid3d3LmV4YW1wbGUuY29tIiwic3ViIjoianJvY2tldEBleGFtcGxlLmNvbSIsIkdpdmVuTmFtZSI6IkpvaG5ueSIsIlN1cm5hbWUiOiJSb2NrZXQiLCJFbWFpbCI6Impyb2NrZXRAZXhhbXBsZS5jb20iLCJSb2xlIjpbIk1hbmFnZXIiLCJQcm9qZWN0IEFkbWluaXN0cmF0b3IiXX0.YTeR6zLCKuOPjz5CYfwxW1gXp_wP1gAnN3qSMJIFQFg
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL","curl -f http://localhost:5001/health || exit 1"]
+      interval: 30s
+      start_period: 5s
+      timeout: 10s
+      retries: 5
 
   mongo:
     image: iemafzal/mongodb:v1
     ports:
-      - "27017:27017"
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=admin
-    volumes:
-      - mongodb_data:/data/db
+    - "27017:27017"
     networks:
-      - chat-network
+    - chat-network
+    environment:
+    - MONGO_INITDB_ROOT_USERNAME=root
+    - MONGO_INITDB_ROOT_PASSWORD=admin
+    volumes:
+    - mongodb_data:/data/db
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "mongo --eval 'db.adminCommand(\"ping\")' --username root --password admin --authenticationDatabase admin || exit 1"]
+      interval: 30s
+      start_period: 5s
+      timeout: 10s
+      retries: 5
 
 networks:
-  chat-network:
-    driver: bridge
-
+  chat-network: 
 volumes:
   mongodb_data:
-
-
-
-
-
-
-
-
-
-
